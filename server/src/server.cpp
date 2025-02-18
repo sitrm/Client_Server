@@ -32,11 +32,12 @@ namespace Net {
 		
 		printf("Creating Socket\n");
 		assert(!((serverSocket = socket(AF_INET, SOCK_DGRAM, 0)) == SOCKET_ERROR) && "Couldn`t create Socket!!!");
-		//   TCP (SOCK_STREAM) ��� UDP (SOCK_DGRAM) // 0 - ��� ��������� 
+		//   TCP (SOCK_STREAM)  UDP (SOCK_DGRAM) // 0 - 
 		printf("Success Socket\n");
 
 		
 		if (bind(serverSocket, (struct sockaddr*)&info, infoLength)) {
+				std::cerr << "Errro bind socket!!!\n";
 				__debugbreak(); 
 			}
 		printf("Socket binded\n");
@@ -162,8 +163,8 @@ namespace Net {
 
 	//----------------------------------------------------------------------------------------------------
 	Server::~Server() {
-		WSACleanup();                // ������ �� ����� ��� 
-		closesocket(serverSocket);   // ������� ����� 
+		WSACleanup();               
+		closesocket(serverSocket);   
 	}
 	//----------------------------------------------------------------------------------------------------
 
