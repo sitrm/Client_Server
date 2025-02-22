@@ -71,7 +71,6 @@ namespace Net {
 			printf("receive() failed...%d\n", WSAGetLastError());
 			exit(EXIT_FAILURE);
 		}
-		
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -79,10 +78,6 @@ namespace Net {
 		
 		printf("Packet from:%s:%d\n", inet_ntoa(info.sin_addr), ntohs(info.sin_port));
 
-
-
-
-	
 		if (buffer[0] == 0x1) {
 			std::vector<int8_t> result;
 			for (unsigned int i = 0; i < recvLength; i++) {
@@ -149,7 +144,7 @@ namespace Net {
 		}
 
 	}
-
+	//----------------------------------------------------------------------------------------------------
 	std::unique_ptr<Primitive> Server::modify(std::string key) {
 		
 		primitives.erase(key);
@@ -160,7 +155,58 @@ namespace Net {
 		current = p->getName();
 		return std::move(p);  
 	}
+	//----------------------------------------------------------------------------------------------------
+	void Server::getIpAddrbyHost(const char* hostname, std::vector<std::string>& vec_ipstr) {
+		// Инициал WinSock
+		WSADATA wsaData;
+		if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+			fprintf(stderr, "WSAStartup failed.\n");
+			__debugbreak();
+		}
 
+		struct addrinfo hints, * res;
+		int status;
+		//char* ipstr[INET6_ADDRSTRLEN];
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_UNSPEC;     //ipv4 and ipv6
+		hints.ai_socktype = SOCK_STREAM;
+
+		//getaddrinfo(hostname, NULL, &hints, &res);
+		if ((status = getaddrinfo(hostname, "http", &hints, &res) != 0)) {
+			fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+			WSACleanup();
+			__debugbreak();
+		}
+
+		for (struct addrinfo* p = res; p != NULL; p = p->ai_next) {
+			void* addr;  // потому что не понятно или ipv4 или ipv6 
+			const char* ipversion;
+			// получаем указаетль в зависимости от версии
+			if (p->ai_family == AF_INET) {   //ipv4 
+				// чтобы вытащить адрес приводим к типу sockaddr_in->sin_addr
+				struct sockaddr_in* ipv4 = (struct sockaddr_in*)p->ai_addr;
+				addr = &(ipv4->sin_addr);
+				ipversion = "IPv4";
+			}
+			else { // IPv6
+				struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)p->ai_addr;
+				addr = &(ipv6->sin6_addr);
+				ipversion = "IPv6";
+			}
+			char ipstr[INET6_ADDRSTRLEN];
+			// преобразуем в норм вид 
+			inet_ntop(p->ai_family, addr, ipstr, INET6_ADDRSTRLEN);
+			vec_ipstr.push_back(ipstr);
+
+			//printf("IP addresses for %s:\n", hostname);
+			//printf("%s: %s\n\n", ipversion, ipstr);
+		}
+		// Освобождаем память
+		freeaddrinfo(res);
+
+		// Завершаем работу с Winsock
+		WSACleanup();
+	}
 	//----------------------------------------------------------------------------------------------------
 	Server::~Server() {
 		WSACleanup();               

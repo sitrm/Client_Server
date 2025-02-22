@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <vector>
 #include <WinSock2.h>
+
+#include <ws2tcpip.h>
 //-----------------------------------------------------------------------------------------------------------
 
 #pragma comment(lib, "Ws2_32.lib") 
@@ -49,6 +51,9 @@ namespace Net{
 		void send();
 
 		std::unique_ptr<Primitive> modify(std::string key);
+
+	private:
+		static void getIpAddrbyHost(const char* hostname, std::vector<std::string>& vec_ipstr);
 
 	}; // classs Server
 } // namespace Net
