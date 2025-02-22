@@ -31,7 +31,7 @@ namespace Net {
 
 		
 		printf("Creating Socket\n");
-		assert(!((serverSocket = socket(AF_INET, SOCK_DGRAM, 0)) == SOCKET_ERROR) && "Couldn`t create Socket!!!");
+		assert(!((serverSocket = socket(PF_INET, SOCK_DGRAM, 0)) == SOCKET_ERROR) && "Couldn`t create Socket!!!");
 		//   TCP (SOCK_STREAM)  UDP (SOCK_DGRAM) // 0 - 
 		printf("Success Socket\n");
 
